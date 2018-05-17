@@ -1,0 +1,33 @@
+<div class="row">
+  <div class="col-xs-10">
+    <rb-shopping-list-edit></rb-shopping-list-edit>
+    <hr>
+    <ul class="list-group">
+      <li
+        *ngFor="let item of (shoppingList$ | async).ingredients; let idx = index"
+        class="list-group-item"
+        [class.active]="selectedIndex == idx"
+        style="cursor: pointer;"
+        [@flyInOut]="'in'">
+        {{ item.name | titlecase }} ({{ item.amount }})
+        <!-- <p
+          title="Click to Edit"
+          (click)="editSelection(idx)">
+          {{ item.name | titlecase }} ({{ item.amount }})
+        </p> -->
+        <button
+          (click)="deleteIngredient(idx)"
+          class="glyphicon glyphicon-remove btn btn-danger pull-right"
+          title="Remove {{ item.name }} from shopping list"></button>
+        <button
+          (click)="editSelection(idx)"
+          class="glyphicon glyphicon-edit btn btn-success pull-right"
+          title="Edit {{ item.name }} in shopping list"></button>
+        <!-- <button
+          *ngIf="canMerge(idx)"
+          class="glyphicon glyphicon-duplicate btn btn-primary pull-right"
+          title="Merge with Existing Item ({{ item.name }}) in shopping list"></button> -->
+      </li>
+    </ul>
+  </div>
+</div>

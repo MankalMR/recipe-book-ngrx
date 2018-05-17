@@ -1,0 +1,57 @@
+<div class="row">
+  <div class="col-xs-12">
+    <form #slForm="ngForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <div class="col-sm-5 form-group">
+          <label for="name">Name</label>
+          <!-- <input type="text" id="name" name="name" class="form-control" [(ngModel)]="name"> -->
+          <input
+              type="text"
+              id="name"
+              name="name"
+              class="form-control"
+              ngModel
+              (blur)="checkInShoppingList()"
+              required>
+
+          <div class="alert alert-warning" role="alert" *ngIf="isShowWarning()">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            Item already exists in shopping list.
+            <div>
+              <a (click)="addDuplicate()" class="alert-link">Add Duplicate</a>&nbsp;|&nbsp;
+              <a (click)="editDupicate()" class="alert-link">Edit Existing</a>
+            </div>
+          </div>
+          <!-- <div *ngIf="slForm.name.touched && slForm.name.invalid" class="alert alert-danger">
+            <div *ngIf="slForm.name.errors.required">Please enter an Item</div>
+          </div> -->
+        </div>
+        <div class="col-sm-2 form-group">
+          <label for="amount">Amount</label>
+          <!-- <input type="number" id="amount" name="amount" class="form-control" #amount> -->
+          <input
+              type="number"
+              id="amount"
+              name="amount"
+              class="form-control"
+              ngModel
+              pattern="^[1-9]+[0-9]*$"
+              required>
+          <!-- <div *ngIf="slForm.amount.touched && slForm.amount.invalid" class="alert alert-danger">
+            <div *ngIf="slForm.amount.errors.required">Please enter Item Quantity</div>
+            <div *ngIf="slForm.amount.errors.noSpaceAllowed">First Name cannot contain space</div>
+          </div> -->
+        </div>
+        <div class="button-group-action">
+            <button
+                class="btn btn-success col-xs-1 glyphicon glyphicon-plus pull-right"
+                type="submit"
+                *ngIf="!isShowWarning()"
+                [disabled]="slForm.invalid">&nbsp;{{(selectedIndex == -1 || isAdd()) ? 'Add' : 'Save'}}
+            </button>
+            <button class="btn btn-primary col-xs-1 glyphicon glyphicon-refresh pull-right" type="button" (click)="clearForm()">&nbsp;Clear</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a [routerLink]="['/']" class="navbar-brand">Recipe Book</a>
+    </div>
+
+    <!-- <div class="collapse navbar-collapse"> -->
+    <div class="navbar-default">
+      <ul class="nav navbar-nav">
+        <li routerLinkActive="active"><a [routerLink]="['/recipeList']">Recipes</a></li>
+        <li routerLinkActive="active"><a [routerLink]="['/shoppingList']">Shopping List</a></li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown" rbDropdown>
+          <a class="dropdown-toggle" role="button">
+            <span class="glyphicon glyphicon-user"></span>
+          </a>
+          <ul class="dropdown-menu" *ngIf="!(authState | async).authenticated; else loggedInUser">
+            <li><a routerLink="/login">Login</a></li>
+            <li><a routerLink="/register">Register</a></li>
+          </ul>
+          <ng-template #loggedInUser>
+            <ul class="dropdown-menu">
+              <li><a>Hey {{ (authState | async).displayName }}!</a></li>
+              <li><a (click)="logout()">Logout</a></li>
+            </ul>
+          </ng-template>
+        </li>
+        <li class="dropdown" rbDropdown  *ngIf="(authState | async).authenticated">
+          <a class="dropdown-toggle" role="button">
+            <span class="glyphicon glyphicon-cog"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a (click)="save()">Save Data</a></li>
+            <li><a (click)="fetch()">Fetch Data</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
