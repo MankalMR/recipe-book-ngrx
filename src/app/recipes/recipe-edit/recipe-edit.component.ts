@@ -4,6 +4,9 @@ import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { Ingredient } from '../../model/ingredient';
+import { Store } from '@ngrx/store';
+import * as fromRecipeReducers from '../store/recipes.reducers';
+import * as RecipesActions from './../store/recipes.actions';
 
 @Component({
   selector: 'rb-recipe-edit',
@@ -16,7 +19,8 @@ export class RecipeEditComponent implements OnInit {
   recipeForm: FormGroup;
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private rService: RecipeService) { }
+              private rService: RecipeService,
+              private store: Store<fromRecipeReducers.RecipesState>) { }
 
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
@@ -33,26 +37,29 @@ export class RecipeEditComponent implements OnInit {
         ingredients: FormGroup[] = [this.ingredientEmptyState()];
 
     if (this.isEditMode) {
-      const selectedRecipe: Recipe = this.rService.getRecipe(this.id);
+      this.store.select('recipes')
+        .take(1)
+        .subscribe((state) => {
+          const selectedRecipe: Recipe = state.recipes[this.id];
+          recipeName = selectedRecipe.name;
+          imagePath = selectedRecipe.imagePath;
+          desc = selectedRecipe.description;
 
-      recipeName = selectedRecipe.name;
-      imagePath = selectedRecipe.imagePath;
-      desc = selectedRecipe.description;
-
-      if (selectedRecipe.ingredients) {
-        ingredients = selectedRecipe.ingredients.map(
-          (ingredient: Ingredient) => {
-            return new FormGroup({
-              name: new FormControl(
-                          ingredient.name,
-                          Validators.required),
-              amount: new FormControl(
-                            ingredient.amount,
-                            [Validators.required,
-                            Validators.pattern(/^[1-9]+[0-9]*$/)])
-          });
+          if (selectedRecipe.ingredients) {
+            ingredients = selectedRecipe.ingredients.map(
+              (ingredient: Ingredient) => {
+                return new FormGroup({
+                  name: new FormControl(
+                              ingredient.name,
+                              Validators.required),
+                  amount: new FormControl(
+                                ingredient.amount,
+                                [Validators.required,
+                                Validators.pattern(/^[1-9]+[0-9]*$/)])
+              });
+            });
+          }
         });
-      }
     }
 
     this.recipeForm = new FormGroup({
@@ -65,16 +72,17 @@ export class RecipeEditComponent implements OnInit {
 
   onSubmit () {
     if (this.isEditMode) {
-      this.rService.updateRecipe(this.recipeForm.value, this.id);
-    } else {
-      this.rService.addRecipe(this.recipeForm.value);
-    }
-
-    if (this.isEditMode) {
+      this.store.dispatch(new RecipesActions.UpdateRecipe({updatedRecipe: this.recipeForm.value, index: this.id}));
+      // this.rService.updateRecipe(this.recipeForm.value, this.id);
       this.router.navigate(['../../', this.id], { relativeTo: this.route });
     } else {
-      const newRecipeIndex = this.rService.noOfRecipes - 1;
-      this.router.navigate(['/recipeList', newRecipeIndex], { relativeTo: this.route });
+      this.store.dispatch(new RecipesActions.AddRecipe(this.recipeForm.value));
+      this.store.select('recipes')
+        .take(1)
+        .subscribe((state) => {
+          const newRecipeIndex = state.recipes.length - 1;
+          this.router.navigate(['/recipeList', newRecipeIndex], { relativeTo: this.route });
+        });
     }
   }
 
@@ -104,6 +112,10 @@ export class RecipeEditComponent implements OnInit {
       amount: new FormControl('', [Validators.required,
                                    Validators.pattern(/^[1-9]+[0-9]*$/)])
     });
+  }
+
+  getControls() {
+    return (<FormArray>this.recipeForm.get('ingredients')).controls;
   }
 
 }

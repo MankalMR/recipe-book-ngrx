@@ -12,56 +12,27 @@ import * as fromRBReducers from '../../store/rb-store.reducers';
 @Injectable()
 export class ShoppingListService {
   private dbName = 'shoppingList';
-  private _ingredients: Ingredient[] = [];
-  private _mergeIndexArray: number[] = [];
-  subIngredientListChanged = new Subject<Ingredient[]>();
-  subEditIngredient = new Subject<EditIngredient>();
-  subMergeIndexArray = new Subject<number[]>();
+  private shoppingList$ = this.store.select('shoppingList');
   eResetSelectedIndex = new EventEmitter();
-  // subIngredientListChanged = new EventEmitter<Ingredient[]>();
+
   constructor(private fbSerice: FirebaseService, private store: Store<fromRBReducers.RBState>) { }
 
-  get ingredients () {
-    return this._ingredients.slice();
-  }
-
-  get mergeIndexArray () {
-    return this._mergeIndexArray.slice();
-  }
-
-  setIngredients (ingredients: Ingredient[]) {
-    this._ingredients = ingredients;
-    this.subIngredientListChanged.next(this.ingredients);
-  }
-
-  /**
-   * gives back the element at passed index
-   * @param idx index of the element to be fetched
-   */
-  getIngredient (idx: number): Ingredient {
-    return this.ingredients[idx];
-  }
-
-  get noOfIngredients () {
-    return this.ingredients.length;
-  }
-
-  findIngredientIndex (ingredientName: string) {
-    return this._ingredients.findIndex((ingredient: Ingredient) => {
+  findIngredientIndex (ingredients: Ingredient[], ingredientName: string) {
+    return ingredients.findIndex((ingredient: Ingredient) => {
       return ingredient.name === ingredientName;
     });
   }
 
   saveShoppingList () {
-    this.store.select('shoppingList')
+    this.shoppingList$
+      .take(1)
       .subscribe((data) => {
-
+        this.fbSerice.saveData(this.dbName, data.ingredients)
+          .subscribe(
+            (response: Response) => console.log(response),
+            (error: Response) => console.log(error)
+          );
       });
-    this.fbSerice.saveData(this.dbName, this.ingredients)
-      .subscribe(
-        (response: Response) => console.log(response),
-        (error: Response) => console.log(error)
-      );
   }
 
   fetchShoppingList () {

@@ -5,6 +5,10 @@ import { Http, HttpModule } from '@angular/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { StoreRouterConnectingModule } from '@ngrx/router-store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+
+import { environment } from './../environments/environment';
 
 import { SharedModule } from './common/shared.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -31,7 +35,9 @@ import { AuthEffects } from './auth/store/auth.effects';
     SharedModule,
     ShoppingListModule,
     StoreModule.forRoot(reducers),
-    EffectsModule.forRoot([AuthEffects])
+    EffectsModule.forRoot([AuthEffects]),
+    StoreRouterConnectingModule,
+    !environment.production ? StoreDevtoolsModule.instrument() : []
   ],
   bootstrap: [AppComponent]
 })

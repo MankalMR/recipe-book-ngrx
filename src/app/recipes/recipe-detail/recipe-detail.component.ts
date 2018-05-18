@@ -8,7 +8,8 @@ import { Recipe } from './../../model/recipe';
 import { Ingredient } from '../../model/ingredient';
 
 import * as ShoppingListActions from './../../shopping-list/store/shopping-list.actions';
-import * as fromRBReducers from '../../store/rb-store.reducers';
+import * as fromRecipeReducers from '../store/recipes.reducers';
+import * as RecipesActions from './../store/recipes.actions';
 
 @Component({
   selector: 'rb-recipe-detail',
@@ -16,19 +17,24 @@ import * as fromRBReducers from '../../store/rb-store.reducers';
   styleUrls: ['./recipe-detail.component.css']
 })
 export class RecipeDetailComponent implements OnInit {
-  private recipe: Recipe;
+  recipe: Recipe;
   private recipeIndex: number;
+  private recipesStateSubscription;
 
   constructor(private slService: ShoppingListService,
               private rService: RecipeService,
               private router: Router,
               private route: ActivatedRoute,
-              private store: Store<fromRBReducers.RBState>) { }
+              private store: Store<fromRecipeReducers.RecipesState>) { }
 
   ngOnInit() {
     this.route.params.subscribe((params: Params) => {
       this.recipeIndex = +params['id'];
-      this.recipe = this.rService.getRecipe(this.recipeIndex);
+      this.store.select('recipes')
+        .take(1)
+        .subscribe((recipesState) => {
+          this.recipe = recipesState.recipes[this.recipeIndex];
+        });
     });
   }
 
@@ -43,7 +49,7 @@ export class RecipeDetailComponent implements OnInit {
   }
 
   deleteRecipe () {
-    this.rService.removeRecipe(this.recipeIndex);
+    this.store.dispatch(new RecipesActions.DeleteRecipe(this.recipeIndex));
     this.router.navigate(['/recipeList']);
   }
 

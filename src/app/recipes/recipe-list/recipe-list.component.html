@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col-xs-12">
         <rb-recipe-item
-            *ngFor="let item of recipes; let idx = index"
+            *ngFor="let item of (recipes$ | async).recipes; let idx = index"
             [recipe]="item"
             [routerLink]="[idx]"></rb-recipe-item>
     </div>

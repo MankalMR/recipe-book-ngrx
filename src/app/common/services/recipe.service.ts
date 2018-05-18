@@ -4,53 +4,27 @@ import { Recipe } from './../../model/recipe';
 import { Injectable } from '@angular/core';
 import { Ingredient } from '../../model/ingredient';
 import { Response } from '@angular/http';
+import { Store } from '@ngrx/store';
+import * as fromRecipeReducers from '../../recipes/store/recipes.reducers';
+import * as RecipesActions from '../../recipes/store/recipes.actions';
 
 @Injectable()
 export class RecipeService {
   private dbName = 'recipes';
   subRecipeListChanged = new Subject<Recipe[]>();
   private recipes: Recipe[] = [];
-  constructor(private fbSerice: FirebaseService) { }
-
-  getRecipes () {
-    console.log(this.recipes.slice());
-    return this.recipes.slice();
-  }
-
-  setRecipes (recipes: Recipe[]) {
-    this.recipes = recipes;
-    this.subRecipeListChanged.next(this.recipes);
-  }
-
-  getRecipe (index: number) {
-    return this.recipes[index];
-  }
-
-  get noOfRecipes () {
-    return this.recipes.length;
-  }
-
-  addRecipe (recipe: Recipe) {
-    this.recipes.push(recipe);
-    this.subRecipeListChanged.next(this.recipes);
-  }
-
-  updateRecipe (recipe: Recipe, index: number) {
-    this.recipes.splice(index, 1, recipe);
-    this.subRecipeListChanged.next(this.recipes);
-  }
-
-  removeRecipe (index: number) {
-    this.recipes.splice(index, 1);
-    this.subRecipeListChanged.next(this.recipes);
-  }
+  constructor(private fbSerice: FirebaseService, private store: Store<fromRecipeReducers.RecipesState>) { }
 
   saveRecipes () {
-    this.fbSerice.saveData(this.dbName, this.recipes)
-      .subscribe(
-        (response: Response) => console.log(response),
-        (error: Response) => console.log(error)
-      );
+    this.store.select('recipes')
+      .take(1)
+      .subscribe((state) => {
+        this.fbSerice.saveData(this.dbName, state.recipes)
+        .subscribe(
+          (response: Response) => console.log(response),
+          (error: Response) => console.log(error)
+        );
+      });
   }
 
   fetchRecipes () {
@@ -63,7 +37,7 @@ export class RecipeService {
               recipe.ingredients = [];
             }
           }
-          this.setRecipes(savedRecipes);
+          this.store.dispatch(new RecipesActions.SetRecipes(savedRecipes));
         },
         (error: Response) => console.log(error)
       );

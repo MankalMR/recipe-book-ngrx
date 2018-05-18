@@ -63,7 +63,7 @@
                 <div class="col-xs-12" formArrayName="ingredients">
                     <div
                         class="row"
-                        *ngFor="let ingCtrl of recipeForm.get('ingredients').controls; let idx = index"
+                        *ngFor="let ingCtrl of getControls(); let idx = index"
                         [formGroupName]="idx">
                         <div class="col-xs-8">
                             <input type="text" class="form-control" formControlName="name">
@@ -79,7 +79,7 @@
                         </div>
                         <div
                             class="col-xs-1"
-                            *ngIf="idx == recipeForm.get('ingredients').controls.length - 1">
+                            *ngIf="idx == getControls().length - 1">
                             <button
                                 type="button"
                                 (click)="addRecipeIngredient()"
